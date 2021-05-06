@@ -9,26 +9,26 @@ from sklearn import metrics
 df = pd.read_csv("D:\\Limudim\\train_Loan.csv")
 
 # Print all missing values for evaluation
-print(df.apply(lambda x: sum(x.isnull()),axis=0)) # This line print the amount of missing value in each column
+print(df.apply(lambda x: sum(x.isnull()),axis=0))
 
 # Fill missing values in some attribute :
-df['Gender'].fillna(stats.mode(df['Gender']), inplace=True)
-df['Married'].fillna(stats.mode(df['Married']), inplace=True)
-df['Dependents'].fillna(stats.mode(df['Dependents']), inplace=True)
-df['Self_Employed'].fillna(stats.mode(df['Self_Employed']), inplace=True)
-df['LoanAmount'].fillna(df['LoanAmount'].mean(), inplace=True)
-df['Loan_Amount_Term'].fillna(df['Loan_Amount_Term'].mean(), inplace=True)
-df['Credit_History'].fillna(stats.mode(df['Credit_History']), inplace=True)
-
-# Reading the dataset in a dataframe using Pandas
 allPredictors = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 'Credit_History', 'Property_Area']
 for i in allPredictors:
     df[i].fillna(stats.mode(df[i]), inplace=True)
 
-var_mod = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'Property_Area', 'Loan_Status']
+# Convert all categorical variables to numeric variables
+Categorical_predictor_var = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'Property_Area', 'Loan_Status']
 le = LabelEncoder()
-for i in var_mod:
-    df[i] = le.fit_transform(df[i])
+for i in Categorical_predictor_var:
+   df[i] = le.fit_transform(df[i])
+#print(df)
+
+print("print df before*******************************")
+print(df)
+df['TotalIncome'] = df['ApplicantIncome'] + df['CoapplicantIncome']
+df['TotalIncome_log'] = np.log(df['TotalIncome'])
+df['LoanAmount_log'] = np.log(df['LoanAmount'])
+print("print df after*******************************")
 print(df)
 
 # Generic function for making a classification model and accessing performance:
@@ -69,12 +69,17 @@ def classification_model(model, data, predictors, outcome):
     return bestPred
 
 # Apply Random Forest with improved predictors and parameters
-print("\nRandom:")
+print("\nRandomForestClassifier with all predictors:")
 myModel = RandomForestClassifier(n_estimators=100)
 predictor_var = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 'Credit_History', 'Property_Area']
 classification_model(myModel, df, predictor_var, 'Loan_Status')
 
-print("\nUsing best:")
+print("\nRandomForestClassifier with ['Credit_History', 'ApplicantIncome', 'LoanAmount', 'CoapplicantIncome', 'Dependents'] predictors:")
 bestModel = RandomForestClassifier(n_estimators=100, max_features='auto')
 bestPredicts = ['Credit_History', 'ApplicantIncome', 'LoanAmount', 'CoapplicantIncome', 'Dependents']
+classification_model(bestModel, df, bestPredicts, 'Loan_Status')
+
+print("\nRandomForestClassifier with ['Credit_History', 'TotalIncome_log', 'LoanAmount_log', 'Dependents'] predictors:")
+bestModel = RandomForestClassifier(n_estimators=100, max_features='auto')
+bestPredicts = ['Credit_History', 'TotalIncome_log', 'LoanAmount_log', 'Dependents']
 classification_model(bestModel, df, bestPredicts, 'Loan_Status')
