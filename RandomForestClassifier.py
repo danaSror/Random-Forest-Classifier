@@ -23,13 +23,11 @@ for i in Categorical_predictor_var:
    df[i] = le.fit_transform(df[i])
 #print(df)
 
-print("print df before*******************************")
-print(df)
+# Create new features
 df['TotalIncome'] = df['ApplicantIncome'] + df['CoapplicantIncome']
 df['TotalIncome_log'] = np.log(df['TotalIncome'])
 df['LoanAmount_log'] = np.log(df['LoanAmount'])
-print("print df after*******************************")
-print(df)
+
 
 # Generic function for making a classification model and accessing performance:
 def classification_model(model, data, predictors, outcome):
